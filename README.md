@@ -89,11 +89,7 @@ Output in `simulations/`:
 
 Blocked nodes are random, so some don't touch the shortest route and the image matches the offline plan. The `simulations/` folder is git-ignored.
 
-## Notes
 
-- The thesis results (Tables 4.1–4.3) are reproduced by this code as-is.
-- Routes may pass through an exit node on the way to another exit (for example `15-23-E2-24-E1`), because exits are ordinary nodes in the graph.
-- Some values in `graph_data.py` disagree with Table 3.1 of the thesis, but the thesis results were generated from the code's values, so they are left as they are:
-  - 31–33 is 2.8 and 31–E5 is 49.04 in the code; the table has them the other way round.
-  - 6–7 is 40.95 from node 6 and 40.45 from node 7.
-  - 2–6 is 36.16 (table: 39.16) and 1–8 is 17.3 (table: 17.38).
+## License
+
+MIT. See [LICENSE](LICENSE).
