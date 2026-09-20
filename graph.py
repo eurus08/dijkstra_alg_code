@@ -1,7 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt 
 from graph_data import ABComplex_data
-from dikjstra import dikjstra
+from dijkstra import dijkstra
+
+EXIT_NODES = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9']
 
 def shift_pos(pos, amount):
     new_pos = {}
@@ -10,8 +12,8 @@ def shift_pos(pos, amount):
     return new_pos
 
 
-def build_graph(source, destination):
-    colours = ['violet', 'orange', 'yellow', 'indigo', 'blue', 'cyan', 'brown', 'violet']
+def build_graph(source, destination, blocked=None, save_path=None):
+    blocked = {str(n) for n in (blocked or ())}
 
     # Create graph
     G = nx.Graph()
@@ -24,8 +26,7 @@ def build_graph(source, destination):
         '15', '16', '17', '18', '19', '20', '21',
         '22', '23', '24', '25', '26', '27', '28',
         '29', '30', '31', '32', '33', '34',
-        'E1', 'E2', 'E3', 'E4'
-    ]
+    ] + EXIT_NODES
     G.add_nodes_from(nodes)
 
 
@@ -61,12 +62,8 @@ def build_graph(source, destination):
     }
 
     # colour particular nodes
-    exit_nodes = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9']
-    node_colors = {}
-
-    for node in exit_nodes:
-        node_colors[node] = 'lightgreen'
-
+    node_colors = {node: 'lightgreen' for node in EXIT_NODES}
+    node_colors.update({node: 'red' for node in blocked})
     node_colors[source] = 'orange'
 
 
@@ -76,17 +73,24 @@ def build_graph(source, destination):
             node_color=[node_colors.get(node, 'lightblue') for node in G.nodes()], node_size=400)
     
 
-    pos = [0.04, -0.04]
-    shortest_path  = dikjstra(ABComplex_data, source, destination)
+    shortest_path = dijkstra(ABComplex_data, source, destination, blocked)
+    if shortest_path is None:
+        raise ValueError(f"No route from {source} to {destination}")
     highlighted_edges = [(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path)-1)]
     nx.draw_networkx_edges(G, shift_pos(position, 0.04), edgelist= highlighted_edges, edge_color= 'orange', 
                            width=2, ax=ax, arrows=True, arrowstyle='->', arrowsize=20)
 
 
-    red_patch = plt.Line2D([], [], color='violet', linewidth=3, label= 'Node'+source) 
-    ax.legend(handles=[red_patch]) 
+    path_patch = plt.Line2D([], [], color='orange', linewidth=3,
+                            label=f'Node {source} to {destination}')
+    ax.legend(handles=[path_patch])
 
-    # plt.savefig("./exit_1.png")
-    plt.show()
+    if save_path:
+        fig.savefig(save_path, dpi=150, bbox_inches='tight')
+        plt.close(fig)
+    else:
+        plt.show()
 
 
+if __name__ == "__main__":
+    build_graph("12", "E7")
