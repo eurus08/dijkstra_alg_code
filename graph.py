@@ -67,26 +67,33 @@ def build_graph(source, destination, blocked=None, save_path=None):
     node_colors[source] = 'orange'
 
 
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(16, 11))
     # Draw graph outline
     nx.draw(G, position, with_labels=True, 
-            node_color=[node_colors.get(node, 'lightblue') for node in G.nodes()], node_size=400)
+            node_color=[node_colors.get(node, 'lightblue') for node in G.nodes()], node_size=700, font_size=11)
     
 
     shortest_path = dijkstra(ABComplex_data, source, destination, blocked)
     if shortest_path is None:
         raise ValueError(f"No route from {source} to {destination}")
-    highlighted_edges = [(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path)-1)]
-    nx.draw_networkx_edges(G, shift_pos(position, 0.04), edgelist= highlighted_edges, edge_color= 'orange', 
-                           width=2, ax=ax, arrows=True, arrowstyle='->', arrowsize=20)
-
+    # Draw the route as centre-to-centre lines with a mid-edge arrowhead, so
+    # short edges (hidden by the node circles) still show direction.
+    shifted = shift_pos(position, 0.04)
+    for u, v in zip(shortest_path, shortest_path[1:]):
+        (x1, y1), (x2, y2) = shifted[u], shifted[v]
+        ax.plot([x1, x2], [y1, y2], color='orange', linewidth=2, zorder=2.5)
+        ax.annotate('', xy=(x1 + 0.6 * (x2 - x1), y1 + 0.6 * (y2 - y1)),
+                    xytext=(x1 + 0.4 * (x2 - x1), y1 + 0.4 * (y2 - y1)),
+                    arrowprops=dict(arrowstyle='-|>', color='orange', lw=2,
+                                    shrinkA=0, shrinkB=0, mutation_scale=22),
+                    zorder=2.6)
 
     path_patch = plt.Line2D([], [], color='orange', linewidth=3,
                             label=f'Node {source} to {destination}')
     ax.legend(handles=[path_patch])
 
     if save_path:
-        fig.savefig(save_path, dpi=150, bbox_inches='tight')
+        fig.savefig(save_path, dpi=200, bbox_inches='tight')
         plt.close(fig)
     else:
         plt.show()
